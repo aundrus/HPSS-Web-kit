@@ -1,0 +1,10 @@
+Installed with the following commands on December 8, 2025
+
+cd includes
+curl -L https://github.com/HuasoFoundries/jpgraph/archive/refs/heads/master.zip -o jpgraph.zip
+unzip jpgraph.zip
+mv jpgraph-master/src jpgraph
+cp -a jpgraph-master/LICENSE.md jpgraph/.
+rm -rf jpgraph-master jpgraph.zip
+
+Also added https://github.com/HuasoFoundries/jpgraph/blob/master/README.md

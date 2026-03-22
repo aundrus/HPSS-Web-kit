@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>HPSS Web Infrastructure – Upgrade & Modernize Testbed</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --bg-alt: #020617;
+      --card-bg: #0b1120;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.15);
+      --accent-strong: #0ea5e9;
+      --border: #1e293b;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --danger: #f97373;
+      --success: #4ade80;
+      --yellow: #facc15;
+      --radius-lg: 16px;
+      --radius-pill: 999px;
+      --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.7);
+      --shadow-pill: 0 8px 24px rgba(15, 23, 42, 0.7);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1e293b 0, #020617 40%, #000 100%);
+      color: var(--text);
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .shell {
+      max-width: 1160px;
+      width: 100%;
+      background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.12) 0, transparent 60%),
+                  radial-gradient(circle at bottom left, rgba(94, 234, 212, 0.08) 0, transparent 55%),
+                  linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 1));
+      border-radius: 24px;
+      padding: 24px;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      box-shadow: var(--shadow-soft);
+      display: grid;
+      grid-template-columns: minmax(0, 2.2fr) minmax(0, 2.4fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+      body {
+        padding: 16px;
+      }
+      .shell {
+        grid-template-columns: minmax(0, 1fr);
+        border-radius: 20px;
+      }
+    }
+
+    /* Left: hero / overview */
+
+    .hero {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.2) 0, transparent 70%);
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      box-shadow: var(--shadow-pill);
+    }
+
+    .pill-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.25);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.2;
+      letter-spacing: 0.02em;
+    }
+
+    h1 span.accent {
+      background: linear-gradient(120deg, #38bdf8, #a855f7, #22c55e);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      margin: 0;
+      margin-top: 6px;
+      font-size: 14px;
+      color: var(--muted);
+      max-width: 40rem;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .tag {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tag-badge {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--accent-strong);
+    }
+
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .btn {
+      border-radius: var(--radius-pill);
+      border: 1px solid transparent;
+      padding: 9px 18px;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: radial-gradient(circle at top left, #38bdf8 0, #0ea5e9 45%, #0f172a 100%);
+      color: #0b1120;
+      font-weight: 600;
+      box-shadow: var(--shadow-pill);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 30px rgba(56, 189, 248, 0.55);
+    }
+
+    .btn-ghost {
+      background: rgba(15, 23, 42, 0.7);
+      color: var(--muted);
+      border-color: rgba(148, 163, 184, 0.5);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(15, 23, 42, 0.95);
+      border-color: var(--accent-strong);
+      color: var(--accent-strong);
+    }
+
+    .btn span.icon {
+      font-size: 16px;
+    }
+
+    .btn-huge {
+      background: linear-gradient(135deg, #38bdf8, #0ea5e9 40%, #0284c7 100%);
+      border: 1px solid rgba(56, 189, 248, 0.7);
+      color: #0b1120;
+      font-size: 16px;
+      padding: 16px 32px;
+      font-weight: 700;
+      border-radius: 40px;
+      box-shadow: 0 12px 32px rgba(56, 189, 248, 0.5);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    /* Pulse + glow animation */
+    @keyframes pulseGlow {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 12px 32px rgba(56, 189, 248, 0.45);
+      }
+     50% {
+       transform: scale(1.04);
+       box-shadow: 0 16px 46px rgba(56, 189, 248, 0.75);
+      }
+     100% {
+       transform: scale(1);
+       box-shadow: 0 12px 32px rgba(56, 189, 248, 0.45);
+      }
+    }
+
+    .animate-pulse-glow {
+      animation: pulseGlow 3.2s ease-in-out infinite;
+    }
+
+    .btn-huge:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 42px rgba(56, 189, 248, 0.8);
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .meta-card {
+      background: rgba(15, 23, 42, 0.85);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      padding: 10px 12px;
+      font-size: 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .meta-label {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .meta-value {
+      font-size: 12px;
+    }
+
+    .meta-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 9px;
+      border-radius: var(--radius-pill);
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .meta-pill span.dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--success);
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.35);
+    }
+
+    .footnote {
+      margin-top: 12px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .footnote strong {
+      color: var(--accent-strong);
+      font-weight: 500;
+    }
+
+    /* Right: cards / PHP8 benefits */
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card {
+      background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.22) 0, rgba(56, 189, 248, 0.02) 48%, transparent 80%);
+      background-color: rgba(15, 23, 42, 0.96);
+      border-radius: 20px;
+      border: 1px solid rgba(148, 163, 184, 0.55);
+      padding: 14px 14px 12px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .card-pill {
+      font-size: 11px;
+      padding: 3px 9px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--muted);
+    }
+
+    .timeline {
+      margin: 10px 0 2px;
+      padding: 0;
+      list-style: none;
+      border-left: 1px dashed rgba(148, 163, 184, 0.6);
+    }
+
+    .timeline-item {
+      margin: 0;
+      padding-left: 14px;
+      padding-bottom: 6px;
+      position: relative;
+    }
+
+    .timeline-item:last-child {
+      padding-bottom: 0;
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: -4.5px;
+      top: 3px;
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .timeline-title {
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .timeline-meta {
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+      font-size: 11px;
+    }
+
+    .badge {
+      padding: 4px 9px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: rgba(15, 23, 42, 0.9);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+    }
+
+    .badge-icon {
+      font-size: 12px;
+    }
+
+    .php-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 8px;
+      font-size: 11px;
+    }
+
+    @media (max-width: 600px) {
+      .php-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .php-col-header {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .php-col-header span {
+      font-weight: 600;
+    }
+
+    .php-col-header.bad {
+      color: var(--danger);
+    }
+
+    .php-col-header.good {
+      color: var(--success);
+    }
+
+    .php-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 5px;
+    }
+
+    .php-item {
+      padding: 6px 8px;
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .php-item-title {
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .php-item-note {
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .php-item.bad {
+      border-color: rgba(248, 113, 113, 0.7);
+      background: linear-gradient(145deg, rgba(127, 29, 29, 0.55), rgba(15, 23, 42, 0.85));
+    }
+
+    .php-item.good {
+      border-color: rgba(74, 222, 128, 0.7);
+      background: linear-gradient(145deg, rgba(22, 101, 52, 0.55), rgba(15, 23, 42, 0.9));
+    }
+
+    .php-item.bad .php-item-title {
+      color: #fecaca;
+    }
+
+    .php-item.good .php-item-title {
+      color: #bbf7d0;
+    }
+
+    .risk-note {
+      margin-top: 10px;
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .risk-note strong {
+      color: var(--yellow);
+      font-weight: 600;
+    }
+
+    .stack-list {
+      display: grid;
+      gap: 4px;
+      font-size: 11px;
+      margin-top: 6px;
+    }
+
+    .stack-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .stack-label {
+      color: var(--muted);
+    }
+
+    .stack-value {
+      text-align: right;
+    }
+
+    .stack-new {
+      color: var(--success);
+    }
+
+    .stack-legacy {
+      color: var(--danger);
+    }
+
+    .stack-ref {
+      color: var(--muted);
+      font-size: 10px;
+      margin-top: 6px;
+    }
+
+    .stack-ref code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 10px;
+      background: rgba(15, 23, 42, 0.9);
+      padding: 2px 5px;
+      border-radius: 6px;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+    }
+
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <!-- LEFT: Overview -->
+    <section class="hero">
+      <div class="pill">
+        <span class="pill-dot"></span>
+        HPSS Web Infrastructure – Upgrade & Modernize Testbed
+      </div>
+
+      <header>
+        <h1>
+          Preparing the next-gen <span class="accent">HPSS Web Platform</span>
+        </h1>
+        <p class="subtitle">
+          This testbed is dedicated to the preparation and deployment of the
+          <strong>Upgrade &amp; Modernize HPSS Web Infrastructure</strong> project, including
+          migration to <strong>RHEL&nbsp;8</strong>, migration from <strong>PHP&nbsp;5</strong> to
+          <strong>PHP&nbsp;8</strong>, and associated code refactoring and hardening.
+        </p>
+      </header>
+
+      <div class="tag-row">
+        <span class="tag">
+          <span class="tag-badge"></span>
+          RHEL 8 migration
+        </span>
+        <span class="tag">
+          <span class="tag-badge"></span>
+          PHP 8 upgrade
+        </span>
+        <span class="tag">
+          <span class="tag-badge"></span>
+          Legacy PHP 5 decommissioning
+        </span>
+        <span class="tag">
+          <span class="tag-badge"></span>
+          Code refactoring &amp; testing
+        </span>
+      </div>
+
+      <div class="cta-row">
+<!--
+        <a href="#environment" class="btn btn-primary">
+          <span class="icon">▶</span>
+          View Testbed Details
+        </a>
+-->
+        <a href="#php8-benefits" class="btn btn-ghost">
+          <span class="icon">⚡</span>
+          Why PHP&nbsp;8 vs PHP&nbsp;5?
+        </a>
+	<a href="index_RACF.php" class="btn btn-huge animate-pulse-glow">
+          <span class="icon">🚀</span>
+          Open New HPSS Web
+        </a>
+      </div>
+
+      <div class="meta-grid">
+        <div class="meta-card">
+          <div class="meta-label">Environment</div>
+          <div class="meta-value">
+            <span class="meta-pill">
+              <span class="dot"></span>
+              Isolated testbed – safe for experimentation
+            </span>
+          </div>
+        </div>
+        <div class="meta-card" id="environment">
+          <div class="meta-label">Scope</div>
+          <div class="meta-value">
+            RHEL&nbsp;8 adoption, PHP&nbsp;8 runtime, dependency refresh, and
+            systematic refactoring of the HPSS web codebase to remove PHP&nbsp;5 patterns and
+            legacy assumptions.
+          </div>
+        </div>
+      </div>
+
+      <p class="footnote">
+        <strong>Note:</strong> This environment is for test and validation only. Once migration
+        paths and refactoring patterns are accepted here, they will be promoted into the
+        production HPSS Web Infrastructure.
+      </p>
+    </section>
+
+    <!-- RIGHT: Timeline, Stack, PHP8 vs PHP5 -->
+    <section class="panel">
+      <!-- Timeline / project focus -->
+      <article class="card">
+        <div class="card-header">
+          <div class="card-title">Upgrade Workstreams</div>
+          <div class="card-pill">RHEL 8 · PHP 8 · Refactor</div>
+        </div>
+
+        <ol class="timeline">
+          <li class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-title">RHEL 8 baseline</div>
+            <div class="timeline-meta">
+              New OS image, updated libraries, modern TLS/OpenSSL defaults, and hardened defaults for
+              HPSS web workloads.
+            </div>
+          </li>
+          <li class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-title">PHP 8 migration</div>
+            <div class="timeline-meta">
+              Replace PHP&nbsp;5 with PHP&nbsp;8, align extensions, and validate compatibility with
+              existing HPSS web modules.
+            </div>
+          </li>
+          <li class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-title">Code refactoring &amp; cleanup</div>
+            <div class="timeline-meta">
+              Remove deprecated APIs, modernize language constructs, and introduce stricter typing,
+              error handling, and test coverage.
+            </div>
+          </li>
+          <li class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-title">Performance &amp; security tuning</div>
+            <div class="timeline-meta">
+              Benchmark critical HPSS paths, enable PHP&nbsp;8 Just-In-Time (JIT) compiler where appropriate, and align
+              configuration with security best practices.
+            </div>
+          </li>
+        </ol>
+
+        <div class="badge-row">
+          <span class="badge">
+            <span class="badge-icon">🧪</span>
+            Safe space for breaking changes &amp; rollbacks
+          </span>
+          <span class="badge">
+            <span class="badge-icon">🔐</span>
+            Security-driven modernization
+          </span>
+          <span class="badge">
+            <span class="badge-icon">📈</span>
+            Measured performance impact
+          </span>
+        </div>
+      </article>
+
+      <!-- Stack overview -->
+      <article class="card">
+        <div class="card-header">
+          <div class="card-title">Target Stack</div>
+          <div class="card-pill">Modernized HPSS Web Platform</div>
+        </div>
+        <div class="stack-list">
+          <div class="stack-item">
+            <span class="stack-label">Operating system</span>
+            <span class="stack-value">
+              <span class="stack-new">RHEL 8</span> ←
+              <span class="stack-legacy">RHEL 6 (legacy)</span>
+            </span>
+          </div>
+          <div class="stack-item">
+            <span class="stack-label">PHP runtime</span>
+            <span class="stack-value">
+              <span class="stack-new">PHP 8.x</span> ←
+              <span class="stack-legacy">PHP 5.x (current HPSS Web)</span>
+            </span>
+          </div>
+          <div class="stack-item">
+            <span class="stack-label">Web tier</span>
+            <span class="stack-value">
+              Apache (tuned for PHP-FPM)
+            </span>
+          </div>
+          <div class="stack-item">
+            <span class="stack-label">Application code</span>
+            <span class="stack-value">
+              Refactored HPSS web modules with reduced legacy &amp; improved testability
+            </span>
+          </div>
+        </div>
+        <p class="stack-ref">
+          All experiments here are isolated from production.
+        </p>
+      </article>
+
+      <!-- PHP 8 vs PHP 5 -->
+      <article class="card" id="php8-benefits">
+        <div class="card-header">
+          <div class="card-title">Why PHP 8 is a major upgrade from PHP 5</div>
+          <div class="card-pill">Key advantages for HPSS Web</div>
+        </div>
+
+        <div class="php-grid">
+          <!-- PHP 5 -->
+          <div>
+            <div class="php-col-header bad">
+              Legacy baseline · <span>PHP 5.x</span>
+            </div>
+            <ul class="php-list">
+              <li class="php-item bad">
+                <div class="php-item-title">End-of-life &amp; unsupported</div>
+                <div class="php-item-note">
+                  No official security fixes or bug patches; growing risk exposure for HPSS web endpoints.
+                </div>
+              </li>
+              <li class="php-item bad">
+                <div class="php-item-title">Limited performance</div>
+                <div class="php-item-note">
+                  Older engine, no JIT, and less efficient memory usage compared to PHP&nbsp;8 –
+                  directly impacting response times.
+                </div>
+              </li>
+              <li class="php-item bad">
+                <div class="php-item-title">Weak typing &amp; error handling</div>
+                <div class="php-item-note">
+                  Fewer language features for strict typing, better exceptions, and robust error
+                  modeling; harder to refactor safely.
+                </div>
+              </li>
+              <li class="php-item bad">
+                <div class="php-item-title">Deprecated APIs everywhere</div>
+                <div class="php-item-note">
+                  Many functions and patterns used in legacy HPSS PHP code are deprecated or incompatible
+                  with current runtimes.
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- PHP 8 -->
+          <div>
+            <div class="php-col-header good">
+              Target baseline · <span>PHP 8.x</span>
+            </div>
+            <ul class="php-list">
+              <li class="php-item good">
+                <div class="php-item-title">Actively supported &amp; secure</div>
+                <div class="php-item-note">
+                  Regular security updates, bug fixes, and alignment with modern OS &amp; library
+                  ecosystems (e.g., RHEL&nbsp;8).
+                </div>
+              </li>
+              <li class="php-item good">
+                <div class="php-item-title">Significant performance gains</div>
+                <div class="php-item-note">
+                  Faster engine, optimized opcache, and optional JIT can reduce latency for HPSS
+                  workflows and heavy pages.
+                </div>
+              </li>
+              <li class="php-item good">
+                <div class="php-item-title">Modern language features</div>
+                <div class="php-item-note">
+                  Union types, attributes, nullsafe operator, constructor property promotion, and more –
+                  all enabling cleaner, safer HPSS code.
+                </div>
+              </li>
+              <li class="php-item good">
+                <div class="php-item-title">Safer, testable refactoring</div>
+                <div class="php-item-note">
+                  Stronger typing, better exceptions, and more consistent behavior make it easier to build
+                  maintainable HPSS web components.
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <p class="risk-note">
+          <strong>Bottom line:</strong> staying on PHP&nbsp;5 locks HPSS into an unsupported, brittle stack.
+          Migrating to PHP&nbsp;8 on RHEL&nbsp;8 is essential to reduce security risk, improve performance,
+          and create a platform where future HPSS web work can be done safely and sustainably.
+        </p>
+      </article>
+    </section>
+  </main>
+</body>
+</html>
+
